@@ -2,19 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
 	"main.go/routes"
 	"os"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("error to load .env: %v", err)
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	log.Fatalf("error to load .env: %v", err)
+	//}
 	// todo -> implement db
 	//cfg, err := configs.LoadConfig()
 	//if err != nil {
