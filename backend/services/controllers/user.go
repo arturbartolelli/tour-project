@@ -1,0 +1,34 @@
+package controllers
+
+import (
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+	"main.go/models"
+	"main.go/utils"
+	"net/http"
+)
+
+type UserController struct {
+	Validator *validator.Validate
+}
+
+func NewUser() *UserController { return &UserController{} }
+
+func (u UserController) Create(ctx echo.Context) error {
+	var data models.User
+
+	if err := ctx.Bind(&data); err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to parse body")
+	}
+
+	if err := u.Validator.Struct(&data); err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to validate body")
+	}
+
+	return utils.HTTPCreated(ctx, data)
+}
+
+func (u UserController) Update(ctx echo.Context) error  { panic("implement me") }
+func (u UserController) Delete(ctx echo.Context) error  { panic("implement me") }
+func (u UserController) GetList(ctx echo.Context) error { panic("implement me") }
+func (u UserController) Get(ctx echo.Context) error     { panic("implement me") }
