@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"main.go/models"
 	"main.go/utils"
@@ -9,10 +10,14 @@ import (
 )
 
 type UserController struct {
-	Validator *validator.Validate
+	validator *validator.Validate
 }
 
-func NewUser() *UserController { return &UserController{} }
+func NewUser() *UserController {
+	return &UserController{
+		validator: validator.New(),
+	}
+}
 
 func (u UserController) Create(ctx echo.Context) error {
 	var data models.User
@@ -21,7 +26,9 @@ func (u UserController) Create(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to parse body")
 	}
 
-	if err := u.Validator.Struct(&data); err != nil {
+	data.UUID = uuid.New()
+
+	if err := u.validator.Struct(&data); err != nil {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to validate body")
 	}
 

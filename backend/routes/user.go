@@ -6,7 +6,7 @@ import (
 	"main.go/services/controllers"
 )
 
-func User(app *echo.Echo) {
+func User(app *echo.Group) {
 	group := app.Group(string(constants.UserRoute))
 	controller := controllers.NewUser()
 
