@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"main.go/constants"
-	"main.go/services/controllers"
+	"main.go/server/controllers"
 )
 
 func User(app *echo.Group) {

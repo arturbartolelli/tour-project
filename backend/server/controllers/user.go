@@ -5,22 +5,25 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"main.go/models"
+	"main.go/server/repositories"
 	"main.go/utils"
 	"net/http"
 	"strconv"
 )
 
-type UserController struct {
-	validator *validator.Validate
-}
-
-func NewUser() *UserController {
-	return &UserController{
+func NewUser() *User {
+	return &User{
 		validator: validator.New(),
+		//repo:      repositories.UserRepository{},
 	}
 }
 
-func (u UserController) Create(ctx echo.Context) error {
+type User struct {
+	validator *validator.Validate
+	repo      *repositories.UserRepository
+}
+
+func (u User) Create(ctx echo.Context) error {
 	var data models.User
 
 	if err := ctx.Bind(&data); err != nil {
@@ -36,7 +39,7 @@ func (u UserController) Create(ctx echo.Context) error {
 	return utils.HTTPCreated(ctx, data)
 }
 
-func (u UserController) Update(ctx echo.Context) error {
+func (u User) Update(ctx echo.Context) error {
 	idStr := ctx.Param("id")
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -57,6 +60,6 @@ func (u UserController) Update(ctx echo.Context) error {
 	return utils.HTTPSucess(ctx, data)
 
 }
-func (u UserController) Delete(ctx echo.Context) error  { panic("implement me") }
-func (u UserController) GetList(ctx echo.Context) error { panic("implement me") }
-func (u UserController) Get(ctx echo.Context) error     { panic("implement me") }
+func (u User) Delete(ctx echo.Context) error  { panic("implement me") }
+func (u User) GetList(ctx echo.Context) error { panic("implement me") }
+func (u User) Get(ctx echo.Context) error     { panic("implement me") }
