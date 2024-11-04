@@ -11,9 +11,8 @@ func User(app *echo.Group) {
 	controller := controllers.NewUser()
 
 	group.POST("", controller.Create)
-	group.PUT(":/id", controller.Update)
-	group.DELETE(":/id", controller.Delete)
+	group.PUT("/:id", controller.Update)
+	group.DELETE("/:id", controller.Delete)
 	group.GET("", controller.GetList)
 	group.GET("/:id", controller.Get)
-
 }
