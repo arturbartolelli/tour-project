@@ -1,6 +1,8 @@
 package configs
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"main.go/constants"
 	"main.go/models"
@@ -24,10 +26,25 @@ func LoadConfig() (*models.Config, error) {
 	return cfg, nil
 }
 
-func GetDBConfig() *models.DBConfig {
+func GetDBConnection() *sql.DB {
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Fatalf("erro to load configs: %v", err)
 	}
-	return &cfg.DB
+
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Pass, cfg.DB.Database,
+	)
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalf("erro ao conectar ao banco de dados: %v", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatalf("erro ao verificar a conexão com o banco de dados: %v", err)
+	}
+
+	return db
 }
