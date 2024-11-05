@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/labstack/echo/v4"
 	"main.go/constants"
-	"main.go/services/controllers"
+	"main.go/server/controllers"
 )
 
 func User(app *echo.Group) {
@@ -11,9 +11,8 @@ func User(app *echo.Group) {
 	controller := controllers.NewUser()
 
 	group.POST("", controller.Create)
-	group.PUT(":/id", controller.Update)
-	group.DELETE(":/id", controller.Delete)
+	group.PUT("/:id", controller.Update)
+	group.DELETE("/:id", controller.Delete)
 	group.GET("", controller.GetList)
 	group.GET("/:id", controller.Get)
-
 }

@@ -2,22 +2,25 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"log"
+	"main.go/configs"
 	"main.go/routes"
-	"os"
 )
 
 func main() {
-	//err := godotenv.Load()
-	//if err != nil {
-	//	log.Fatalf("error to load .env: %v", err)
-	//}
-	// todo -> implement db
-	//cfg, err := configs.LoadConfig()
-	//if err != nil {
-	//	log.Fatalf("error to load configs: %v", err)
-	//}
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("error to load .env: %v", err)
+	}
+
+	cfg, err := configs.LoadConfig()
+	if err != nil {
+		log.Fatalf("error to load configs: %v", err)
+	}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -29,12 +32,8 @@ func main() {
 	}))
 
 	routes.Load(e)
-	// todo -> implement db
-	//port := cfg.API.Port
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+
+	port := cfg.API.Port
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 
 }
