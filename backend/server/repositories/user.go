@@ -34,7 +34,7 @@ func (r *UserRepository) GetList() ([]models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	rows, err := r.postgres.QueryContext(ctx, "SELECT id, name, email FROM users")
+	rows, err := r.postgres.QueryContext(ctx, "SELECT id, uuid, name, email, created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -42,9 +42,10 @@ func (r *UserRepository) GetList() ([]models.User, error) {
 
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email); err != nil {
+		if err := rows.Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}
+		user.Password = ""
 		users = append(users, user)
 	}
 
@@ -70,8 +71,9 @@ func (r *UserRepository) Create(user *models.User) error {
 	defer cancel()
 
 	err := r.postgres.QueryRowContext(ctx,
-		"INSERT INTO users (uuid, name, email, password) VALUES ($1, $2, $3, $4) RETURNING id",
-		user.UUID, user.Name, user.Email, user.Password).Scan(&user.ID)
+		"INSERT INTO users (uuid, name, email, password, isadmin) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at",
+		user.UUID, user.Name, user.Email, user.Password, user.IsAdmin).
+		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 
 	return err
 }
@@ -81,8 +83,8 @@ func (r *UserRepository) Update(id int64, data *models.User) error {
 	defer cancel()
 
 	result, err := r.postgres.ExecContext(ctx,
-		"UPDATE users SET name = $1, email = $2, password = $3, updated_at = NOW() WHERE id = $4",
-		data.Name, data.Email, data.Password, id)
+		"UPDATE users SET name = $1, email = $2, password = $3, isadmin = $4, updated_at = NOW() WHERE id = $5",
+		data.Name, data.Email, data.Password, data.IsAdmin, id)
 
 	if err != nil {
 		return err

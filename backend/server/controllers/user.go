@@ -49,10 +49,17 @@ func (u User) Create(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to create user")
 	}
 
-	return utils.HTTPCreated(ctx, data)
+	token, err := utils.GenerateJWT(int64(data.ID))
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to generate token")
+	}
+	response := map[string]interface{}{
+		"user":  data,
+		"token": token,
+	}
+	return utils.HTTPCreated(ctx, response)
 }
 
-// Update an existing user
 func (u User) Update(ctx echo.Context) error {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -77,7 +84,6 @@ func (u User) Update(ctx echo.Context) error {
 		data.Password = string(hashedPassword)
 	}
 
-	// Atualiza o usuário no repositório
 	if err := u.repo.Update(id, &data); err != nil {
 		if err == sql.ErrNoRows {
 			return utils.HTTPFail(ctx, http.StatusNotFound, err, "user not found")
@@ -85,10 +91,14 @@ func (u User) Update(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to update user")
 	}
 
-	return utils.HTTPSucess(ctx, "user updated successfully")
+	updatedUser, err := u.repo.Get(id)
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to retrieve updated user")
+	}
+
+	return utils.HTTPSucess(ctx, updatedUser)
 }
 
-// Delete a user
 func (u User) Delete(ctx echo.Context) error {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -96,11 +106,19 @@ func (u User) Delete(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "id should be a number")
 	}
 
+	user, err := u.repo.Get(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return utils.HTTPFail(ctx, http.StatusNotFound, err, "user not found")
+		}
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to retrieve user")
+	}
+
 	if err := u.repo.Delete(id); err != nil {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to delete user")
 	}
 
-	return utils.HTTPSucess(ctx, "user deleted successfully")
+	return utils.HTTPSucess(ctx, user)
 }
 
 func (u User) Get(ctx echo.Context) error {
