@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { UserProvider } from "@/context/UserContext";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,22 +26,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const user = {
-    id: '1',
-    name: "Artur",
-    email: "arturbartonelli@gmail.com",
-    isAdmin: true,
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex items-start justify-between`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <UserProvider initialUser={user}>
+          <UserProvider>
             <main className="w-full h-full">{children}</main>
+            <Toaster />
           </UserProvider>
         </ThemeProvider>
       </body>
