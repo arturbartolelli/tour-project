@@ -1,4 +1,7 @@
-import * as React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +14,42 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginUser } from "./actions";
+import { isActionError } from "@/utils/error";
+import { toast } from "sonner";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    await loginUser(email, password)
+      .then((res) => {
+        if(isActionError(res)) {
+          console.error(res)
+        }
+        toast("Login realizado!");
+
+        router.push("/");
+      })
+      .catch((err) => {
+        if (isActionError(err)) {
+          toast("Erro de login");
+        } else {
+          toast("Erro inesperado");
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-[350px] p-4">
@@ -21,27 +58,45 @@ export default function Login() {
           <CardDescription>Bem-vindo de volta!</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Digite seu email" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Digite seu email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" placeholder="Digite sua senha" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Digite sua senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
             </div>
+            <CardFooter className="flex justify-between mt-4">
+              <Button variant="outline" type="button" onClick={() => router.push("/")}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Entrando..." : "Login"}
+              </Button>
+            </CardFooter>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">Cancelar</Button>
-          <Button>Login</Button>
-        </CardFooter>
         <div className="text-center flex justify-center gap-2">
           Não possui conta?
           <Link href="/register" className="underline">
-               Registrar-se
+            Registrar-se
           </Link>
         </div>
       </Card>
