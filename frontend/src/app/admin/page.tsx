@@ -1,123 +1,215 @@
+'use client'
+
 import Header from "@/components/Header";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { useState } from "react";
+import { Edit } from "lucide-react";
 
-const reservas = [
+type Reserva = {
+  data: {
+    createdAt: string;
+    deletedAt: string;
+    updatedAt: string;
+    date: string;
+    time: string;
+    city: string;
+    price: number;
+    reservation: string;
+    uuid: string;
+  };
+};
+
+const initialReservas: Reserva[] = [
   {
-    reservaId: "RES001",
-    statusReserva: "Confirmada",
-    passeio: "Passeio na Praia de Jericoacoara",
-    dia: "2023-12-01",
-    hora: "09:00",
-    preco: "R$250,00",
-    nomeCliente: "João Silva",
-    emailCliente: "joao.silva@example.com",
-  },
-  {
-    reservaId: "RES002",
-    statusReserva: "Pendente",
-    passeio: "Visita ao Parque Nacional de Ubajara",
-    dia: "2023-12-02",
-    hora: "14:00",
-    preco: "R$150,00",
-    nomeCliente: "Maria Oliveira",
-    emailCliente: "maria.oliveira@example.com",
-  },
-  {
-    reservaId: "RES003",
-    statusReserva: "Cancelada",
-    passeio: "City Tour em Fortaleza",
-    dia: "2023-12-03",
-    hora: "10:00",
-    preco: "R$350,00",
-    nomeCliente: "Carlos Santos",
-    emailCliente: "carlos.santos@example.com",
-  },
-  {
-    reservaId: "RES004",
-    statusReserva: "Confirmada",
-    passeio: "Passeio nas Dunas de Canoa Quebrada",
-    dia: "2023-12-04",
-    hora: "11:00",
-    preco: "R$450,00",
-    nomeCliente: "Ana Souza",
-    emailCliente: "ana.souza@example.com",
-  },
-  {
-    reservaId: "RES005",
-    statusReserva: "Confirmada",
-    passeio: "Trilha na Serra de Guaramiranga",
-    dia: "2023-12-05",
-    hora: "15:00",
-    preco: "R$550,00",
-    nomeCliente: "Pedro Lima",
-    emailCliente: "pedro.lima@example.com",
-  },
-  {
-    reservaId: "RES006",
-    statusReserva: "Pendente",
-    passeio: "Passeio de Barco em Paracuru",
-    dia: "2023-12-06",
-    hora: "08:00",
-    preco: "R$200,00",
-    nomeCliente: "Julia Araújo",
-    emailCliente: "julia.araujo@example.com",
-  },
-  {
-    reservaId: "RES007",
-    statusReserva: "Cancelada",
-    passeio: "Visita ao Centro Histórico de Sobral",
-    dia: "2023-12-07",
-    hora: "13:00",
-    preco: "R$300,00",
-    nomeCliente: "Rafael Costa",
-    emailCliente: "rafael.costa@example.com",
+    data: {
+      createdAt: "2023-11-01",
+      deletedAt: "",
+      updatedAt: "2023-11-01",
+      date: "2023-12-01",
+      time: "09:00",
+      city: "Jericoacoara",
+      price: 250,
+      reservation: "João Cleber",
+      uuid: "RES001",
+    },
   },
 ];
 
 export default function Admin() {
+  const [reservas, setReservas] = useState<Reserva[]>(initialReservas);
+  const [selectedReserva, setSelectedReserva] = useState<Reserva | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleEdit = (reserva: Reserva) => {
+    setSelectedReserva(reserva);
+    setIsSheetOpen(true);
+  };
+
+  const handleSaveChanges = () => {
+    setReservas((prevReservas) =>
+      prevReservas.map((reserva) =>
+        reserva.data.uuid === selectedReserva?.data.uuid
+          ? selectedReserva
+          : reserva
+      )
+    );
+    setIsSheetOpen(false);
+  };
+
+  const handleInputChange = (field: keyof Reserva["data"], value: string | number) => {
+    setSelectedReserva((prev) => ({
+      data: {
+        ...prev!.data,
+        [field]: value,
+      },
+    }));
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <Header />
-      <Card className="w-[calc(100%-2rem)] max-w-4xl mt-28 p-6 shadow-lg rounded-lg">
-        <Table>
-          <TableCaption>Lista de reservas de passeios em cidades turísticas do Ceará.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[150px]">Reserva ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Passeio</TableHead>
-              <TableHead>Dia</TableHead>
-              <TableHead>Hora</TableHead>
-              <TableHead>Preço</TableHead>
-              <TableHead>Nome do Cliente</TableHead>
-              <TableHead>Email do Cliente</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {reservas.map((reserva) => (
-              <TableRow key={reserva.reservaId}>
-                <TableCell className="font-medium">{reserva.reservaId}</TableCell>
-                <TableCell>{reserva.statusReserva}</TableCell>
-                <TableCell>{reserva.passeio}</TableCell>
-                <TableCell>{reserva.dia}</TableCell>
-                <TableCell>{reserva.hora}</TableCell>
-                <TableCell>{reserva.preco}</TableCell>
-                <TableCell>{reserva.nomeCliente}</TableCell>
-                <TableCell>{reserva.emailCliente}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
+      <Tabs defaultValue="reservas" className=" mt-28">
+        <TabsList className="grid grid-cols-2 justify-center">
+          <TabsTrigger value="reservas">Reservas</TabsTrigger>
+          <TabsTrigger value="users">Usuários</TabsTrigger>
+        </TabsList>
+        <TabsContent value="reservas">
+          <Card className="w-full max-w-4xl p-6 shadow-lg rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Hora</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Cidade</TableHead>
+                  <TableHead>Edição</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reservas.map((reserva: Reserva) => (
+                  <TableRow key={reserva.data.uuid}>
+                    <TableCell className="font-medium">{reserva.data.uuid}</TableCell>
+                    <TableCell>{reserva.data.reservation}</TableCell>
+                    <TableCell>{reserva.data.date}</TableCell>
+                    <TableCell>{reserva.data.time}</TableCell>
+                    <TableCell>{`R$${reserva.data.price.toFixed(2)}`}</TableCell>
+                    <TableCell>{reserva.data.city}</TableCell>
+                    <TableCell>
+                      <Button variant="outline" onClick={() => handleEdit(reserva)}>
+                        <Edit />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Sheet para edição */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Editar Reserva</SheetTitle>
+            <SheetDescription>
+              Faça alterações nas informações da reserva. Clique em salvar quando terminar.
+            </SheetDescription>
+          </SheetHeader>
+          {selectedReserva && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="reservation" className="text-right">
+                  Passeio
+                </Label>
+                <Input
+                  id="reservation"
+                  value={selectedReserva.data.reservation}
+                  onChange={(e) => handleInputChange("reservation", e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Data
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={selectedReserva.data.date}
+                  onChange={(e) => handleInputChange("date", e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="time" className="text-right">
+                  Hora
+                </Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={selectedReserva.data.time}
+                  onChange={(e) => handleInputChange("time", e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">
+                  Preço
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={selectedReserva.data.price}
+                  onChange={(e) => handleInputChange("price", Number(e.target.value))}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="city" className="text-right">
+                  Cidade
+                </Label>
+                <Input
+                  id="city"
+                  value={selectedReserva.data.city}
+                  onChange={(e) => handleInputChange("city", e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+          )}
+          <SheetFooter>
+            <SheetClose asChild>
+              <Button onClick={handleSaveChanges} type="submit">
+                Salvar Alterações
+              </Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
