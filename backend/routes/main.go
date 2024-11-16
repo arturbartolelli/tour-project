@@ -10,5 +10,5 @@ func Load(app *echo.Echo) {
 	authedGroup := app.Group("", middleware.Logger())
 
 	User(authedGroup)
-	Route(authedGroup)
+	Tour(authedGroup)
 }

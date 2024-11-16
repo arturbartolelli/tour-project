@@ -6,7 +6,7 @@ import (
 	"main.go/server/controllers"
 )
 
-func Route(app *echo.Group) {
+func Tour(app *echo.Group) {
 	group := app.Group(string(constants.TourRoute))
 	tourController := controllers.NewTour()
 
