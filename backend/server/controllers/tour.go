@@ -12,35 +12,31 @@ import (
 	"strconv"
 )
 
-func NewTour() *Tour {
+func NewTour(repo repositories.TourRepositoryInterface) *Tour {
 	return &Tour{
 		validator: validator.New(),
-		repo:      repositories.TourRepo,
+		repo:      repo,
 	}
 }
 
 type Tour struct {
 	validator *validator.Validate
-	repo      *repositories.TourRepository
+	repo      repositories.TourRepositoryInterface // Alterado para interface
 }
 
 func (t Tour) Create(ctx echo.Context) error {
 	var data models.Tour
 
-	// Bind dos dados da requisição
 	if err := ctx.Bind(&data); err != nil {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to parse body")
 	}
 
-	// Gera um UUID para o passeio
 	data.UUID = uuid.New().String()
 
-	// Validação dos dados da requisição
 	if err := t.validator.Struct(&data); err != nil {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to validate body")
 	}
 
-	// Cria o tour no repositório
 	if err := t.repo.Create(&data); err != nil {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to create tour")
 	}
@@ -68,4 +64,62 @@ func (t Tour) Delete(ctx echo.Context) error {
 	}
 
 	return utils.HTTPSucess(ctx, tour)
+}
+
+func (t Tour) Update(ctx echo.Context) error {
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "id should be a number")
+	}
+
+	var data models.Tour
+	if err := ctx.Bind(&data); err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to parse body")
+	}
+
+	if err := t.validator.Struct(&data); err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to validate body")
+	}
+
+	if err := t.repo.Update(id, &data); err != nil {
+		if err == sql.ErrNoRows {
+			return utils.HTTPFail(ctx, http.StatusNotFound, err, "tour not found")
+		}
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to update tour")
+	}
+
+	updatedTour, err := t.repo.Get(id)
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to retrieve updated tour")
+	}
+
+	return utils.HTTPSucess(ctx, updatedTour)
+}
+
+func (t Tour) Get(ctx echo.Context) error {
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "id should be a number")
+	}
+
+	tour, err := t.repo.Get(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return utils.HTTPFail(ctx, http.StatusNotFound, err, "tour not found")
+		}
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to get tour")
+	}
+
+	return utils.HTTPSucess(ctx, tour)
+}
+
+func (t Tour) GetList(ctx echo.Context) error {
+	tours, err := t.repo.GetList()
+	if err != nil {
+		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to get tours list")
+	}
+
+	return utils.HTTPSucess(ctx, tours)
 }

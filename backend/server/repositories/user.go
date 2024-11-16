@@ -34,7 +34,7 @@ func (r *UserRepository) GetList() ([]models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	rows, err := r.postgres.QueryContext(ctx, "SELECT id, uuid, name, email, created_at, updated_at FROM users")
+	rows, err := r.postgres.QueryContext(ctx, "SELECT id, uuid, name, email, isadmin ,created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (r *UserRepository) GetList() ([]models.User, error) {
 
 	for rows.Next() {
 		var user models.User
-		if err := rows.Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if err := rows.Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}
 		user.Password = ""
