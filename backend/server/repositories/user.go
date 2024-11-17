@@ -71,8 +71,8 @@ func (r *UserRepository) Get(id int64) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	err := r.postgres.QueryRowContext(ctx, "SELECT id, uuid, name, email, password, created_at, updated_at FROM users WHERE id = $1", id).
-		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.postgres.QueryRowContext(ctx, "SELECT id, uuid, name, email, password, isadmin, created_at, updated_at FROM users WHERE id = $1", id).
+		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.Password, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 
 	if err != nil {
 		return nil, err

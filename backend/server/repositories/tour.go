@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"main.go/configs"
 	"main.go/models"
+	"strconv"
 	"time"
 )
 
@@ -46,10 +47,42 @@ func (r *TourRepository) Update(id int64, data *models.Tour) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	result, err := r.postgres.ExecContext(ctx,
-		"UPDATE tours SET reservation = $1, date = $2, time = $3, city = $4, price = $5, updated_at = NOW() WHERE id = $6",
-		data.Reservation, data.Date, data.Time, data.City, data.Price, id)
+	// Montar a consulta SQL dinamicamente com base nos campos preenchidos
+	query := "UPDATE tours SET"
+	args := []interface{}{}
+	argID := 1
 
+	if data.Reservation != "" {
+		query += " reservation = $" + strconv.Itoa(argID) + ","
+		args = append(args, data.Reservation)
+		argID++
+	}
+	if data.Date != "" {
+		query += " date = $" + strconv.Itoa(argID) + ","
+		args = append(args, data.Date)
+		argID++
+	}
+	if data.Time != "" {
+		query += " time = $" + strconv.Itoa(argID) + ","
+		args = append(args, data.Time)
+		argID++
+	}
+	if data.City != "" {
+		query += " city = $" + strconv.Itoa(argID) + ","
+		args = append(args, data.City)
+		argID++
+	}
+	if data.Price != 0 {
+		query += " price = $" + strconv.Itoa(argID) + ","
+		args = append(args, data.Price)
+		argID++
+	}
+
+	// Remover a vírgula final e adicionar condição WHERE
+	query = query[:len(query)-1] + " WHERE id = $" + strconv.Itoa(argID)
+	args = append(args, id)
+
+	result, err := r.postgres.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
