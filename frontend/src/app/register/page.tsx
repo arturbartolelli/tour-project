@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,33 +14,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { registerUser } from "./actions";
 import { toast } from "sonner";
+import { registerUser } from "./actions";
 
 export default function Register() {
-  const [fullName, setFullName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    await registerUser(fullName, email, password)
+    await registerUser( fullName, email, password )
       .then((res) => {
         if (!res || "status" in res) {
-          toast("Erro no cadatro");
+          toast("Erro no cadastro");
           return;
         }
 
         toast("Cadastro realizado!");
-
         router.push("/login");
       })
       .catch((err) => {
-        console.error(err)
+        console.error(err);
         toast("Erro inesperado");
       })
       .finally(() => setIsLoading(false));
@@ -57,9 +56,9 @@ export default function Register() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="fullName">Nome Completo</Label>
+                <Label htmlFor="name">Nome Completo</Label>
                 <Input
-                  id="fullName"
+                  id="name"
                   type="text"
                   placeholder="Digite seu nome completo"
                   value={fullName}

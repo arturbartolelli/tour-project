@@ -13,7 +13,7 @@ type UserResponse = {
 }
 
 export async function loginUser(email: string, password: string): Promise<UserResponse | ActionError>{
-  return fetchAdmin<UserResponse>(`/login`, {
+  return fetchAdmin<UserResponse>(`/user/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -24,11 +24,7 @@ export async function loginUser(email: string, password: string): Promise<UserRe
       if(!isActionError(res)) {
         if(res.data.token) {
           const token = res.data.token;
-          cookies().set("token", token, {
-            httpOnly: true,
-            secure: true,
-            path: "/",
-          });
+          cookies().set("token", token);
         }
         return res
       }

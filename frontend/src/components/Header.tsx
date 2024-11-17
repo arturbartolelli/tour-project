@@ -6,6 +6,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import { logout } from "@/server-actions/logout";
 
 export default function Header() {
   const navigate = useRouter();
@@ -29,7 +30,7 @@ export default function Header() {
           <Button onClick={() => navigate.push("/register")}>Cadastrar</Button>
         )}
         {user ? (
-          <Button variant="outline">Desconectar</Button>
+          <Button variant="outline" onClick={logout}>Desconectar</Button>
         ) : (
           <Button onClick={() => navigate.push("/login")} variant="outline">
             Login
