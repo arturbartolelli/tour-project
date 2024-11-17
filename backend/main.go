@@ -8,13 +8,13 @@ import (
 	"log"
 	"main.go/configs"
 	"main.go/routes"
+	"os"
 )
 
 func main() {
-
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("error to load .env: %v", err)
+		log.Printf("error to load .env: %v", err)
 	}
 
 	cfg, err := configs.LoadConfig()
@@ -33,7 +33,10 @@ func main() {
 
 	routes.Load(e)
 
-	port := cfg.API.Port
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = cfg.API.Port
+	}
 
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }

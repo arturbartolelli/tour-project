@@ -1,5 +1,6 @@
-'use client'
+"use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Header from "@/components/Header";
 import {
   Table,
@@ -23,67 +24,124 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useState } from "react";
-import { Edit } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
+import { getTours, updateTour, deleteTours, getUsers } from "./actions";
+import { isActionError } from "@/utils/error";
+import { formatDateAndTime } from "@/lib/utils";
+import { toast } from "sonner";
 
-type Reserva = {
-  data: {
-    createdAt: string;
-    deletedAt: string;
-    updatedAt: string;
-    date: string;
-    time: string;
-    city: string;
-    price: number;
-    reservation: string;
-    uuid: string;
-  };
+export type Reserva = {
+  id: string;
+  createdAt: string;
+  deletedAt: string;
+  updatedAt: string;
+  date: string;
+  time: string;
+  city: string;
+  price: number;
+  reservation: string;
+  uuid: string;
 };
 
-const initialReservas: Reserva[] = [
-  {
-    data: {
-      createdAt: "2023-11-01",
-      deletedAt: "",
-      updatedAt: "2023-11-01",
-      date: "2023-12-01",
-      time: "09:00",
-      city: "Jericoacoara",
-      price: 250,
-      reservation: "João Cleber",
-      uuid: "RES001",
-    },
-  },
-];
+export type User = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  email: string;
+  password: string;
+  name: string;
+  isAdmin: boolean;
+  uuid: string;
+};
 
 export default function Admin() {
-  const [reservas, setReservas] = useState<Reserva[]>(initialReservas);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
   const [selectedReserva, setSelectedReserva] = useState<Reserva | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const getTourList = useCallback(async () => {
+    const res = await getTours();
+    if (isActionError(res)) {
+      console.error("Erro ao carregar reservas:", res);
+      return;
+    }
+    setReservas(res);
+  }, []);
+
+  const getUserList = useCallback(async () => {
+    const res = await getUsers();
+    if (isActionError(res)) {
+      console.error("Error:", res);
+      return;
+    }
+    setUsers(res);
+  }, []);
+
+  useEffect(() => {
+    getTourList();
+    getUserList();
+  }, [getTourList, getUserList]);
 
   const handleEdit = (reserva: Reserva) => {
     setSelectedReserva(reserva);
     setIsSheetOpen(true);
   };
 
-  const handleSaveChanges = () => {
-    setReservas((prevReservas) =>
-      prevReservas.map((reserva) =>
-        reserva.data.uuid === selectedReserva?.data.uuid
-          ? selectedReserva
-          : reserva
-      )
-    );
-    setIsSheetOpen(false);
+  const handleSaveChanges = async () => {
+    if (selectedReserva) {
+      const id = selectedReserva.id;
+
+      const payload = {
+        reservation: selectedReserva.reservation,
+        price: selectedReserva.price,
+        city: selectedReserva.city,
+      };
+
+      const res = await updateTour(id, payload);
+
+      if (isActionError(res)) {
+        toast("Erro ao atualizar reserva");
+        console.error("Error", res);
+        return;
+      }
+
+      toast("Reserva atualizada");
+
+      setReservas((prevReservas) =>
+        prevReservas.map((reserva) =>
+          reserva.uuid === id ? { ...reserva, ...selectedReserva } : reserva
+        )
+      );
+
+      setIsSheetOpen(false);
+      getTourList()
+    }
   };
 
-  const handleInputChange = (field: keyof Reserva["data"], value: string | number) => {
-    setSelectedReserva((prev) => ({
-      data: {
-        ...prev!.data,
-        [field]: value,
-      },
-    }));
+  const handleDelete = async (id: string) => {
+    const res = await deleteTours(id);
+    if (isActionError(res)) {
+      console.error("Erro ao excluir reserva:", res);
+      return;
+    }
+    setReservas((prevReservas) =>
+      prevReservas.filter((reserva) => reserva.id !== id)
+    );
+
+    toast("Reserva excluída com sucesso");
+  };
+
+  const handleInputChange = (field: keyof Reserva, value: string | number) => {
+    setSelectedReserva((prev) =>
+      prev
+        ? {
+            ...prev,
+            [field]: value,
+          }
+        : null
+    );
   };
 
   return (
@@ -106,37 +164,83 @@ export default function Admin() {
                   <TableHead>Preço</TableHead>
                   <TableHead>Cidade</TableHead>
                   <TableHead>Edição</TableHead>
+                  <TableHead>Excluir</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reservas.map((reserva: Reserva) => (
-                  <TableRow key={reserva.data.uuid}>
-                    <TableCell className="font-medium">{reserva.data.uuid}</TableCell>
-                    <TableCell>{reserva.data.reservation}</TableCell>
-                    <TableCell>{reserva.data.date}</TableCell>
-                    <TableCell>{reserva.data.time}</TableCell>
-                    <TableCell>{`R$${reserva.data.price.toFixed(2)}`}</TableCell>
-                    <TableCell>{reserva.data.city}</TableCell>
-                    <TableCell>
-                      <Button variant="outline" onClick={() => handleEdit(reserva)}>
-                        <Edit />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {reservas.map((reserva) => {
+                  const { date, time } = formatDateAndTime(
+                    reserva.date,
+                    reserva.time
+                  );
+                  return (
+                    <TableRow key={reserva.id}>
+                      <TableCell className="font-medium">
+                        {reserva.id}
+                      </TableCell>
+                      <TableCell>{reserva.reservation}</TableCell>
+                      <TableCell>{date}</TableCell>
+                      <TableCell>{time}</TableCell>
+                      <TableCell>{`R$${reserva.price.toFixed(2)}`}</TableCell>
+                      <TableCell>{reserva.city}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEdit(reserva)}
+                        >
+                          <Edit />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDelete(reserva.id)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+        <TabsContent value="users">
+          <Card className="w-full max-w-4xl p-6 shadow-lg rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Administrador</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => {
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.id}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.isAdmin ? "Sim" : "Não"}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Sheet para edição */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent>
           <SheetHeader>
             <SheetTitle>Editar Reserva</SheetTitle>
             <SheetDescription>
-              Faça alterações nas informações da reserva. Clique em salvar quando terminar.
+              Faça alterações nas informações da reserva. Clique em salvar
+              quando terminar.
             </SheetDescription>
           </SheetHeader>
           {selectedReserva && (
@@ -147,32 +251,10 @@ export default function Admin() {
                 </Label>
                 <Input
                   id="reservation"
-                  value={selectedReserva.data.reservation}
-                  onChange={(e) => handleInputChange("reservation", e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="date" className="text-right">
-                  Data
-                </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={selectedReserva.data.date}
-                  onChange={(e) => handleInputChange("date", e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="time" className="text-right">
-                  Hora
-                </Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={selectedReserva.data.time}
-                  onChange={(e) => handleInputChange("time", e.target.value)}
+                  value={selectedReserva.reservation}
+                  onChange={(e) =>
+                    handleInputChange("reservation", e.target.value)
+                  }
                   className="col-span-3"
                 />
               </div>
@@ -183,8 +265,10 @@ export default function Admin() {
                 <Input
                   id="price"
                   type="number"
-                  value={selectedReserva.data.price}
-                  onChange={(e) => handleInputChange("price", Number(e.target.value))}
+                  value={selectedReserva.price}
+                  onChange={(e) =>
+                    handleInputChange("price", Number(e.target.value))
+                  }
                   className="col-span-3"
                 />
               </div>
@@ -194,7 +278,7 @@ export default function Admin() {
                 </Label>
                 <Input
                   id="city"
-                  value={selectedReserva.data.city}
+                  value={selectedReserva.city}
                   onChange={(e) => handleInputChange("city", e.target.value)}
                   className="col-span-3"
                 />

@@ -17,12 +17,13 @@ import { Label } from "@/components/ui/label";
 import { loginUser } from "./actions";
 import { isActionError } from "@/utils/error";
 import { toast } from "sonner";
+import { useUser } from "@/context/UserContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+  const { setUser } = useUser()
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,8 +35,10 @@ export default function Login() {
         if(isActionError(res)) {
           console.error(res)
         }
-        toast("Login realizado!");
+        if(!isActionError(res))
+          setUser(res.data.user)
 
+        toast("Login realizado!");
         router.push("/");
       })
       .catch((err) => {

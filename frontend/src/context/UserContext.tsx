@@ -7,9 +7,6 @@ export type User = {
   name: string
   email: string
   isAdmin: boolean
-  createdAt: string
-  deletedAt: string
-  password: string
   uuid: string
 }
 
