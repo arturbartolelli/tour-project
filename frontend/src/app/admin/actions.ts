@@ -1,9 +1,8 @@
 "use server";
 
 import { ActionError, isActionError } from "@/utils/error";
-import { Reserva } from "./page";
+import { Reserva, User } from "./page";
 import fetchAdmin from "@/server-actions/fetchAdmin";
-import { User } from "@/context/UserContext";
 
 export const getTours = async (): Promise<Reserva[] | ActionError> => {
   return await fetchAdmin<{ data: Reserva[] }>("/tour")
@@ -30,7 +29,6 @@ export const updateTour = async (
   id: string,
   data: EditReservation
 ): Promise<Reserva[] | ActionError> => {
-  console.log(data);
   return await fetchAdmin<{ data: Reserva[] }>(`/tour/${id}`, {
     method: "PUT",
     headers: {

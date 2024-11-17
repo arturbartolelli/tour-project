@@ -35,6 +35,7 @@ export default function RootLayout({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? (decodedToken as any).user 
     : null;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body

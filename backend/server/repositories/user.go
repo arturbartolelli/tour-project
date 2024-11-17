@@ -34,8 +34,8 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	err := r.postgres.QueryRowContext(ctx, "SELECT id, uuid, name, email, password, created_at, updated_at FROM users WHERE email = $1", email).
-		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.postgres.QueryRowContext(ctx, "SELECT id, uuid, name, email, password, created_at, updated_at, isadmin FROM users WHERE email = $1", email).
+		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt, &user.IsAdmin)
 
 	if err != nil {
 		return nil, err
