@@ -7,14 +7,16 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { logout } from "@/server-actions/header";
+import { toast } from "sonner";
 
 export default function Header() {
   const navigate = useRouter();
   const { user, setUser } = useUser();
-  
+
   const handleLogout = () => {
     logout()
     setUser(null)
+    toast('Desconectado com sucesso')
     return
   }
 
