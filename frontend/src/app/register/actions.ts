@@ -10,16 +10,16 @@ type RegisterUserResponse = {
 };
 
 export async function registerUser(
-  fullName: string,
+  name: string,
   email: string,
   password: string
 ): Promise<RegisterUserResponse | ActionError> {
-  return fetchAdmin<RegisterUserResponse>("/register", {
+  return fetchAdmin<RegisterUserResponse>("/user", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ fullName, email, password }),
+    body: JSON.stringify({ name, email, password }),
   })
     .then((res) => {
       if (!isActionError(res)) {

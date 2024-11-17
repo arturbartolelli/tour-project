@@ -48,7 +48,7 @@ func (u User) Login(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusUnauthorized, err, "invalid email or password")
 	}
 
-	token, err := utils.GenerateJWT(int64(user.ID))
+	token, err := utils.GenerateJWT(user)
 	if err != nil {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to generate token")
 	}
@@ -83,7 +83,7 @@ func (u User) Create(ctx echo.Context) error {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to create user")
 	}
 
-	token, err := utils.GenerateJWT(int64(data.ID))
+	token, err := utils.GenerateJWT(&data)
 	if err != nil {
 		return utils.HTTPFail(ctx, http.StatusInternalServerError, err, "failed to generate token")
 	}
