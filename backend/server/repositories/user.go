@@ -29,6 +29,20 @@ func NewUserRepository() *UserRepository {
 	}
 }
 
+func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
+	var user models.User
+	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
+	defer cancel()
+
+	err := r.postgres.QueryRowContext(ctx, "SELECT id, uuid, name, email, password, created_at, updated_at FROM users WHERE email = $1", email).
+		Scan(&user.ID, &user.UUID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (r *UserRepository) GetList() ([]models.User, error) {
 	var users []models.User
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)

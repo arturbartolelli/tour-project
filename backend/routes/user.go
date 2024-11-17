@@ -15,4 +15,6 @@ func User(app *echo.Group) {
 	group.DELETE("/:id", controller.Delete)
 	group.GET("", controller.GetList)
 	group.GET("/:id", controller.Get)
+
+	group.POST("/login", controller.Login)
 }
