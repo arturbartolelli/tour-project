@@ -21,7 +21,7 @@ export const getTours = async (): Promise<Reserva[] | ActionError> => {
 
 type EditReservation = {
   reservation: string;
-  price: number;
+  price: string;
   city: string;
 };
 
