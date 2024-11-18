@@ -181,7 +181,7 @@ export default function Admin() {
                       <TableCell>{reserva.reservation}</TableCell>
                       <TableCell>{date}</TableCell>
                       <TableCell>{time}</TableCell>
-                      <TableCell>{`R$${reserva.price.toFixed(2)}`}</TableCell>
+                      <TableCell>{`R$${(reserva.price).toFixed(2)}`}</TableCell>
                       <TableCell>{reserva.city}</TableCell>
                       <TableCell>
                         <Button
