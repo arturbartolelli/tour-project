@@ -47,7 +47,6 @@ func (r *TourRepository) Update(id int64, data *models.Tour) error {
 	ctx, cancel := context.WithTimeout(context.Background(), r.timeout)
 	defer cancel()
 
-	// Montar a consulta SQL dinamicamente com base nos campos preenchidos
 	query := "UPDATE tours SET"
 	args := []interface{}{}
 	argID := 1
@@ -72,13 +71,7 @@ func (r *TourRepository) Update(id int64, data *models.Tour) error {
 		args = append(args, data.City)
 		argID++
 	}
-	if data.Price != 0 {
-		query += " price = $" + strconv.Itoa(argID) + ","
-		args = append(args, data.Price)
-		argID++
-	}
 
-	// Remover a vírgula final e adicionar condição WHERE
 	query = query[:len(query)-1] + " WHERE id = $" + strconv.Itoa(argID)
 	args = append(args, id)
 
