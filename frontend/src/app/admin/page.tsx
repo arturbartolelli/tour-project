@@ -38,7 +38,7 @@ export type Reserva = {
   date: string;
   time: string;
   city: string;
-  price: number;
+  price: string;
   reservation: string;
   uuid: string;
 };
@@ -181,7 +181,7 @@ export default function Admin() {
                       <TableCell>{reserva.reservation}</TableCell>
                       <TableCell>{date}</TableCell>
                       <TableCell>{time}</TableCell>
-                      <TableCell>{`R$${reserva.price.toFixed(2)}`}</TableCell>
+                      <TableCell>{`R$${Number(reserva.price).toFixed(2)}`}</TableCell>
                       <TableCell>{reserva.city}</TableCell>
                       <TableCell>
                         <Button

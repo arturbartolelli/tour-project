@@ -72,7 +72,7 @@ func (r *TourRepository) Update(id int64, data *models.Tour) error {
 		args = append(args, data.City)
 		argID++
 	}
-	if data.Price != 0 {
+	if data.Price != "" {
 		query += " price = $" + strconv.Itoa(argID) + ","
 		args = append(args, data.Price)
 		argID++
