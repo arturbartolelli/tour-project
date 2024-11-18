@@ -14,10 +14,10 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("error to load .env: %v", err)
+		log.Printf("Warning: no .env file found, continuing without it: %v", err)
 	}
 
-	cfg, err := configs.LoadConfig()
+	_, err = configs.LoadConfig()
 	if err != nil {
 		log.Fatalf("error to load configs: %v", err)
 	}
@@ -27,7 +27,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173"},
+		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
 	}))
 
@@ -35,7 +35,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = cfg.API.Port
+		port = "8080"
 	}
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
