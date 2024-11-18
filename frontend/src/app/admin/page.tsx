@@ -25,7 +25,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Edit, Trash2 } from "lucide-react";
-import { getTours, updateTour, deleteTours } from "./actions";
+import { getTours, updateTour, deleteTours, getUsers } from "./actions";
 import { isActionError } from "@/utils/error";
 import { formatDateAndTime } from "@/lib/utils";
 import { toast } from "sonner";
@@ -43,9 +43,22 @@ export type Reserva = {
   uuid: string;
 };
 
+export type User = {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  email: string;
+  password: string;
+  name: string;
+  isAdmin: boolean;
+  uuid: string;
+};
+
 export default function Admin() {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [selectedReserva, setSelectedReserva] = useState<Reserva | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const getTourList = useCallback(async () => {
@@ -57,9 +70,19 @@ export default function Admin() {
     setReservas(res);
   }, []);
 
+  const getUserList = useCallback(async () => {
+    const res = await getUsers();
+    if (isActionError(res)) {
+      console.error("Error:", res);
+      return;
+    }
+    setUsers(res);
+  }, []);
+
   useEffect(() => {
     getTourList();
-  }, [getTourList]);
+    getUserList();
+  }, [getTourList, getUserList]);
 
   const handleEdit = (reserva: Reserva) => {
     setSelectedReserva(reserva);
@@ -68,7 +91,6 @@ export default function Admin() {
 
   const handleSaveChanges = async () => {
     if (selectedReserva) {
-      
       const id = selectedReserva.id;
 
       const payload = {
@@ -76,27 +98,27 @@ export default function Admin() {
         price: selectedReserva.price,
         city: selectedReserva.city,
       };
-  
+
       const res = await updateTour(id, payload);
-  
+
       if (isActionError(res)) {
         toast("Erro ao atualizar reserva");
         console.error("Error", res);
         return;
       }
-  
+
       toast("Reserva atualizada");
-  
+
       setReservas((prevReservas) =>
         prevReservas.map((reserva) =>
           reserva.uuid === id ? { ...reserva, ...selectedReserva } : reserva
         )
       );
-  
+
       setIsSheetOpen(false);
+      getTourList()
     }
   };
-  
 
   const handleDelete = async (id: string) => {
     const res = await deleteTours(id);
@@ -177,6 +199,32 @@ export default function Admin() {
                           <Trash2 />
                         </Button>
                       </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+        </TabsContent>
+        <TabsContent value="users">
+          <Card className="w-full max-w-4xl p-6 shadow-lg rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Administrador</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => {
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.id}</TableCell>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.isAdmin ? "Sim" : "Não"}</TableCell>
                     </TableRow>
                   );
                 })}
