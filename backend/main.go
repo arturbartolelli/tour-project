@@ -33,7 +33,7 @@ func main() {
 
 	routes.Load(e)
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("API_PORT")
 	if port == "" {
 		port = "8080"
 	}

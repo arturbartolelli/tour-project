@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
+	"log"
 	"main.go/constants"
 	"os"
 )
@@ -16,6 +18,10 @@ var Defaults = map[string]interface{}{
 }
 
 func init() {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Printf("Warning: no .env file found. This is fine if running in a production environment.")
+	}
+
 	for key := range Defaults {
 		if value := os.Getenv(key); value != "" {
 			Defaults[key] = value

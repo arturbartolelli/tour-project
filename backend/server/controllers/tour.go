@@ -21,7 +21,7 @@ func NewTour(repo repositories.TourRepositoryInterface) *Tour {
 
 type Tour struct {
 	validator *validator.Validate
-	repo      repositories.TourRepositoryInterface // Alterado para interface
+	repo      repositories.TourRepositoryInterface
 }
 
 func (t Tour) Create(ctx echo.Context) error {
@@ -32,6 +32,14 @@ func (t Tour) Create(ctx echo.Context) error {
 	}
 
 	data.UUID = uuid.New().String()
+
+	if data.Price == "" {
+		data.Price = "100"
+	} else {
+		if _, err := strconv.ParseFloat(data.Price, 64); err != nil {
+			return utils.HTTPFail(ctx, http.StatusBadRequest, err, "invalid value for price")
+		}
+	}
 
 	if err := t.validator.Struct(&data); err != nil {
 		return utils.HTTPFail(ctx, http.StatusBadRequest, err, "failed to validate body")

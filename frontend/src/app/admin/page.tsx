@@ -38,7 +38,7 @@ export type Reserva = {
   date: string;
   time: string;
   city: string;
-  price: number;
+  price: string;
   reservation: string;
   uuid: string;
 };
@@ -181,7 +181,7 @@ export default function Admin() {
                       <TableCell>{reserva.reservation}</TableCell>
                       <TableCell>{date}</TableCell>
                       <TableCell>{time}</TableCell>
-                      <TableCell>{`R$${(reserva.price).toFixed(2)}`}</TableCell>
+                      <TableCell>{`R$${Number(reserva.price).toFixed(2)}`}</TableCell>
                       <TableCell>{reserva.city}</TableCell>
                       <TableCell>
                         <Button
@@ -267,7 +267,7 @@ export default function Admin() {
                   type="number"
                   value={selectedReserva.price}
                   onChange={(e) =>
-                    handleInputChange("price", Number(e.target.value))
+                    handleInputChange("price", String(e.target.value))
                   }
                   className="col-span-3"
                 />
